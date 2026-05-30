@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metrik Model - Prediksi Obesitas</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        /* Animasi masuk bertahap khusus untuk metrik */
+        .metric-stagger-1 { animation: slide-up-fade 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
+        .metric-stagger-2 { animation: slide-up-fade 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; animation-delay: 0.15s; }
+        .metric-stagger-3 { animation: slide-up-fade 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; animation-delay: 0.3s; }
+        .metric-stagger-4 { animation: slide-up-fade 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; animation-delay: 0.45s; }
+        .metric-stagger-5 { animation: slide-up-fade 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; animation-delay: 0.6s; }
+
+        @keyframes slide-up-fade {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Hover efek 3D untuk metrik card */
+        .interactive-metric-card {
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+            cursor: pointer;
+            animation: none !important;
+            opacity: 1 !important;
+            transform: none !important;
+        }
+        .interactive-metric-card:hover {
+            transform: translateY(-8px) scale(1.03) !important;
+            box-shadow: 0 20px 45px rgba(99, 102, 241, 0.16) !important;
+        }
+
+        /* Rotasi halus icon saat hover card */
+        .interactive-metric-card:hover i {
+            transform: scale(1.25) rotate(12deg);
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        /* Pulse glow untuk akurasi utama */
+        .glow-pulse-primary {
+            animation: pulse-glow 3s infinite ease-in-out;
+        }
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 15px 35px rgba(99, 102, 241, 0.35); }
+            50% { box-shadow: 0 20px 45px rgba(99, 102, 241, 0.6); }
+        }
+
+        /* Animasi pertumbuhan lebar progress bar saat diload */
+        @keyframes grow-bar-train {
+            from { width: 0%; }
+            to { width: 70%; }
+        }
+        @keyframes grow-bar-val {
+            from { width: 0%; }
+            to { width: 15%; }
+        }
+        @keyframes grow-bar-test {
+            from { width: 0%; }
+            to { width: 15%; }
+        }
+
+        .bar-train { animation: grow-bar-train 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .bar-val { animation: grow-bar-val 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; animation-delay: 0.2s; }
+        .bar-test { animation: grow-bar-test 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; animation-delay: 0.4s; }
+    </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="/">
+            <i class="bi bi-heart-pulse-fill me-2"></i>KNN Obesitas
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="/">Prediksi Manual</a></li>
+                <li class="nav-item"><a class="nav-link" href="/upload">Upload CSV</a></li>
+                <li class="nav-item"><a class="nav-link active" href="/metrics">Metrik Model</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-5 mb-5">
+    <div class="card shadow p-5">
+        <h1 class="text-center mb-2">
+            <i class="bi bi-graph-up me-2 animate-breeze text-primary"></i>Evaluasi Model KNN
+        </h1>
+        <p class="text-center text-muted mb-5">
+            Metrik performa lengkap — Train, Validasi, dan Pengujian
+        </p>
+
+        {% if accuracy is not none %}
+
+        <!-- ===== Akurasi Cards ===== -->
+        <h5 class="fw-bold mb-3 metric-stagger-1"><i class="bi bi-speedometer2 text-primary me-2 animate-bounce"></i>Akurasi Model</h5>
+        <div class="row g-3 mb-5 metric-stagger-1">
+
+            <div class="col-lg-3 col-md-6 col-6">
+                <div class="card text-center border-0 p-4 metric-card-primary interactive-metric-card glow-pulse-primary" style="height:100%;">
+                    <h6 class="text-white-50 mb-1"><i class="bi bi-check2-all me-1"></i>Pengujian (Test)</h6>
+                    <h1 class="text-white fw-bold mb-0" style="font-size:2.4rem;">
+                        {{ "%.2f"|format(accuracy * 100) }}%
+                    </h1>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6 col-6">
+                <div class="card text-center border-0 p-4 interactive-metric-card" style="height:100%;background:rgba(20,184,166,0.08);">
+                    <h6 class="text-muted mb-1"><i class="bi bi-clipboard-check me-1" style="color:#14b8a6;"></i>Validasi (Val)</h6>
+                    <h1 class="fw-bold mb-0" style="font-size:2.4rem;color:#14b8a6;">
+                        {{ "%.2f"|format(val_accuracy * 100) }}%
+                    </h1>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6 col-6">
+                <div class="card text-center border-0 p-4 interactive-metric-card" style="height:100%;background:rgba(99,102,241,0.07);">
+                    <h6 class="text-muted mb-1"><i class="bi bi-arrow-repeat me-1 text-primary"></i>CV Score (5-fold)</h6>
+                    <h1 class="fw-bold mb-0 text-primary" style="font-size:2.4rem;">
+                        {{ "%.2f"|format(cv_score * 100) }}%
+                    </h1>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6 col-6">
+                <div class="card text-center border-0 p-4 interactive-metric-card" style="height:100%;background:rgba(236,72,153,0.06);">
+                    <h6 class="text-muted mb-1"><i class="bi bi-diagram-3 me-1" style="color:#ec4899;"></i>Algoritma</h6>
+                    <h3 class="fw-bold mb-0" style="color:#ec4899;">KNN</h3>
+                    <small class="text-muted">K-Nearest Neighbors</small>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ===== Dataset Split Info ===== -->
+        <h5 class="fw-bold mb-3 metric-stagger-2"><i class="bi bi-pie-chart text-primary me-2"></i>Pembagian Dataset</h5>
+        
+        <!-- Live growing multi-colored progress bar -->
+        <div class="progress mb-4 metric-stagger-2" style="height: 24px; border-radius: 12px; background: rgba(0,0,0,0.05); overflow: hidden; box-shadow: inset 0 2px 4px rgba(0,0,0,0.03);">
+            <div class="progress-bar progress-bar-striped progress-bar-animated bar-train" role="progressbar" style="background-color: var(--primary); font-weight: 700;" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100">Train (70%)</div>
+            <div class="progress-bar progress-bar-striped progress-bar-animated bar-val" role="progressbar" style="background-color: #14b8a6; font-weight: 700;" aria-valuenow="15" aria-valuemin="0" aria-valuemax="100">Val (15%)</div>
+            <div class="progress-bar progress-bar-striped progress-bar-animated bar-test" role="progressbar" style="background-color: #ec4899; font-weight: 700;" aria-valuenow="15" aria-valuemin="0" aria-valuemax="100">Test (15%)</div>
+        </div>
+
+        <div class="row mb-5 metric-stagger-2">
+            {% set total = train_size + val_size + test_size %}
+            <div class="col-md-4 mb-3">
+                <div class="card border-0 p-3 text-center interactive-metric-card"
+                     style="background:rgba(99,102,241,0.06);border-radius:14px!important;">
+                    <i class="bi bi-collection text-primary" style="font-size:1.8rem;"></i>
+                    <h4 class="fw-bold text-primary mb-0 mt-2">{{ train_size }}</h4>
+                    <p class="text-muted small mb-0">Set Pelatihan (Train)<br>
+                        <strong>{{ "%.0f"|format(train_size/total*100) }}%</strong> dari total</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card border-0 p-3 text-center interactive-metric-card"
+                     style="background:rgba(20,184,166,0.07);border-radius:14px!important;">
+                    <i class="bi bi-clipboard-data" style="font-size:1.8rem;color:#14b8a6;"></i>
+                    <h4 class="fw-bold mb-0 mt-2" style="color:#14b8a6;">{{ val_size }}</h4>
+                    <p class="text-muted small mb-0">Set Validasi (Validation)<br>
+                        <strong>{{ "%.0f"|format(val_size/total*100) }}%</strong> dari total</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card border-0 p-3 text-center interactive-metric-card"
+                     style="background:rgba(236,72,153,0.06);border-radius:14px!important;">
+                    <i class="bi bi-shield-check" style="font-size:1.8rem;color:#ec4899;"></i>
+                    <h4 class="fw-bold mb-0 mt-2" style="color:#ec4899;">{{ test_size }}</h4>
+                    <p class="text-muted small mb-0">Set Pengujian (Test)<br>
+                        <strong>{{ "%.0f"|format(test_size/total*100) }}%</strong> dari total</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== Best Params ===== -->
+        {% if best_params %}
+        <h5 class="fw-bold mb-3 metric-stagger-3"><i class="bi bi-sliders text-primary me-2"></i>Parameter KNN Terbaik (GridSearchCV)</h5>
+        <div class="row mb-5 metric-stagger-3">
+            <div class="col-md-4 mb-3">
+                <div class="card border-0 p-3 text-center interactive-metric-card"
+                     style="background:rgba(99,102,241,0.06);border-radius:14px!important;">
+                    <p class="text-muted small mb-1">n_neighbors</p>
+                    <h3 class="text-primary fw-bold mb-0">{{ best_params.n_neighbors }}</h3>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card border-0 p-3 text-center interactive-metric-card"
+                     style="background:rgba(99,102,241,0.06);border-radius:14px!important;">
+                    <p class="text-muted small mb-1">weights</p>
+                    <h3 class="text-primary fw-bold mb-0">{{ best_params.weights }}</h3>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card border-0 p-3 text-center interactive-metric-card"
+                     style="background:rgba(99,102,241,0.06);border-radius:14px!important;">
+                    <p class="text-muted small mb-1">metric (jarak)</p>
+                    <h3 class="text-primary fw-bold mb-0">{{ best_params.metric }}</h3>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- ===== Feature Selection ===== -->
+        {% if selected_features %}
+        <h5 class="fw-bold mb-3 metric-stagger-4"><i class="bi bi-funnel text-primary me-2 animate-breeze"></i>Feature Selection (SelectKBest)</h5>
+        <div class="row mb-5 metric-stagger-4">
+            <div class="col-md-6 mb-3">
+                <div class="card border-0 p-4"
+                     style="background:rgba(16,185,129,0.06);border-radius:14px!important;">
+                    <h6 class="fw-bold" style="color:#10b981;">
+                        <i class="bi bi-check-circle-fill me-2"></i>Fitur Dipilih ({{ selected_features|length }})
+                    </h6>
+                    <div class="d-flex flex-wrap gap-2 mt-2">
+                        {% for f in selected_features %}
+                        <span class="badge" style="background:#10b981;font-size:0.8rem;padding:7px 12px;">{{ f }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <div class="card border-0 p-4"
+                     style="background:rgba(239,68,68,0.05);border-radius:14px!important;">
+                    <h6 class="fw-bold text-danger">
+                        <i class="bi bi-x-circle-fill me-2"></i>Fitur Dibuang ({{ removed_features|length }})
+                    </h6>
+                    <div class="d-flex flex-wrap gap-2 mt-2">
+                        {% for f in removed_features %}
+                        <span class="badge bg-danger" style="font-size:0.8rem;padding:7px 12px;">{{ f }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% else %}
+        <div class="alert alert-warning text-center">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            Data metrik belum tersedia. Jalankan <code>train_model.py</code> terlebih dahulu.
+        </div>
+        {% endif %}
+
+        <!-- ===== Confusion Matrix ===== -->
+        <h5 class="fw-bold mb-3 metric-stagger-5"><i class="bi bi-grid-3x3-gap-fill text-primary me-2"></i>Confusion Matrix</h5>
+        <p class="text-muted mb-4 metric-stagger-5">Visualisasi perbandingan prediksi vs label sebenarnya pada set pengujian (test set)</p>
+        <div class="text-center mb-5 metric-stagger-5">
+            <img src="/confusion_matrix" alt="Confusion Matrix" class="img-fluid rounded shadow"
+                 style="max-width:650px; transition: all 0.5s ease;"
+                 onmouseover="this.style.transform='scale(1.04)'"
+                 onmouseout="this.style.transform='scale(1)'"
+                 onerror="this.parentElement.innerHTML='<div class=\'alert alert-warning\'>Confusion matrix belum tersedia. Jalankan <code>train_model.py</code> terlebih dahulu.</div>'">
+        </div>
+
+        <div class="text-center metric-stagger-5">
+            <a href="/" class="btn btn-primary px-4 me-2">
+                <i class="bi bi-house me-1"></i>Kembali ke Prediksi
+            </a>
+            <a href="/upload" class="btn btn-outline-primary px-4">
+                <i class="bi bi-cloud-arrow-up me-1"></i>Upload CSV
+            </a>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

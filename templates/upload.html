@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Data CSV - Prediksi Obesitas</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="/">
+            <i class="bi bi-heart-pulse-fill me-2"></i>KNN Obesitas
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="/">Prediksi Manual</a></li>
+                <li class="nav-item"><a class="nav-link active" href="/upload">Upload CSV</a></li>
+                <li class="nav-item"><a class="nav-link" href="/metrics">Metrik Model</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-5 mb-5">
+    <div class="card shadow p-5">
+        <h1 class="text-center mb-2">
+            <i class="bi bi-cloud-arrow-up-fill text-primary me-2 animate-breeze"></i>Upload Data CSV
+        </h1>
+        <p class="text-center text-muted mb-4">
+            Unggah file CSV berisi data pasien untuk prediksi batch menggunakan model KNN
+        </p>
+
+        {% if error %}
+        <div class="alert alert-danger text-center">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ error }}
+        </div>
+        {% endif %}
+
+        <div class="upload-area text-center p-5 mb-4" id="dropZone"
+             style="border: 2px dashed #2563eb; border-radius: 15px; background: #f0f5ff; cursor: pointer;">
+            <i class="bi bi-file-earmark-spreadsheet" style="font-size: 3rem; color: #2563eb;"></i>
+            <h5 class="mt-3 text-primary">Drag & drop file CSV di sini</h5>
+            <p class="text-muted">atau klik untuk memilih file</p>
+            <p class="text-muted small" id="fileName">Belum ada file dipilih</p>
+        </div>
+
+        <form action="/upload" method="POST" enctype="multipart/form-data" id="uploadForm">
+            <input type="file" name="file" id="fileInput" accept=".csv" class="d-none" required>
+            <button type="submit" class="btn btn-primary w-100 mt-2" id="submitBtn" disabled>
+                <i class="bi bi-cpu me-2"></i>Proses Prediksi Batch
+            </button>
+        </form>
+
+        <div class="mt-4">
+            <h6><i class="bi bi-info-circle-fill text-primary me-1"></i> Format CSV yang diterima:</h6>
+            <p class="text-muted small mb-1">File harus memiliki kolom berikut (tanpa kolom target NObeyesdad):</p>
+            <div class="table-responsive">
+                <table class="table table-sm table-bordered text-center small">
+                    <thead class="table-primary">
+                        <tr>
+                            <th>Gender</th><th>Age</th><th>Height</th><th>Weight</th>
+                            <th>family_history_with_overweight</th><th>FAVC</th><th>FCVC</th><th>NCP</th>
+                            <th>CAEC</th><th>SMOKE</th><th>CH2O</th><th>SCC</th>
+                            <th>FAF</th><th>TUE</th><th>CALC</th><th>MTRANS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Male</td><td>25</td><td>1.70</td><td>70</td>
+                            <td>yes</td><td>yes</td><td>2</td><td>3</td>
+                            <td>Sometimes</td><td>no</td><td>2</td><td>no</td>
+                            <td>1</td><td>1</td><td>Sometimes</td><td>Public_Transportation</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const fileName = document.getElementById('fileName');
+    const submitBtn = document.getElementById('submitBtn');
+
+    dropZone.addEventListener('click', () => fileInput.click());
+
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.style.borderColor = '#1d4ed8';
+        dropZone.style.background = '#dbeafe';
+    });
+
+    dropZone.addEventListener('dragleave', () => {
+        dropZone.style.borderColor = '#2563eb';
+        dropZone.style.background = '#f0f5ff';
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.style.borderColor = '#2563eb';
+        dropZone.style.background = '#f0f5ff';
+        if (e.dataTransfer.files.length) {
+            fileInput.files = e.dataTransfer.files;
+            updateFileName();
+        }
+    });
+
+    fileInput.addEventListener('change', updateFileName);
+
+    function updateFileName() {
+        if (fileInput.files.length > 0) {
+            fileName.textContent = fileInput.files[0].name;
+            fileName.classList.remove('text-muted');
+            fileName.classList.add('text-success', 'fw-bold');
+            submitBtn.disabled = false;
+        }
+    }
+</script>
+</body>
+</html>

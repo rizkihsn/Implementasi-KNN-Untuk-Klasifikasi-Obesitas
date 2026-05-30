@@ -1,0 +1,33 @@
+{
+  "accuracy": 0.8738170347003155,
+  "val_accuracy": 0.8580441640378549,
+  "cv_score": 0.8544480073293632,
+  "best_params": {
+    "metric": "manhattan",
+    "n_neighbors": 3,
+    "weights": "distance"
+  },
+  "selected_features": [
+    "Age",
+    "Gender",
+    "Height",
+    "Weight",
+    "CALC",
+    "FAVC",
+    "FCVC",
+    "NCP",
+    "family_history_with_overweight",
+    "FAF",
+    "CAEC",
+    "MTRANS"
+  ],
+  "removed_features": [
+    "SCC",
+    "SMOKE",
+    "CH2O",
+    "TUE"
+  ],
+  "train_size": 1477,
+  "val_size": 317,
+  "test_size": 317
+}
